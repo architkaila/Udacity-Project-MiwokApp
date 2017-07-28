@@ -1,32 +1,24 @@
-/*
- * Copyright (C) 2016 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.example.android.miwok;
+
 
 import android.content.Context;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+import android.support.v4.app.Fragment;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
 import java.util.ArrayList;
 
-public class NumbersActivity extends AppCompatActivity {
+
+/**
+ * A simple {@link Fragment} subclass.
+ */
+public class NumbersFragment extends Fragment {
 
     MediaPlayer mMediaPlayer;
     AudioManager mAudioManager;
@@ -50,12 +42,19 @@ public class NumbersActivity extends AppCompatActivity {
         }
     };
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.word_list);
 
-        mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+    public NumbersFragment() {
+        // Required empty public constructor
+    }
+
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        View rootView = inflater.inflate(R.layout.word_list, container, false);
+
+
+        mAudioManager = (AudioManager) getActivity().getSystemService(Context.AUDIO_SERVICE);
 
         final ArrayList<word> words = new ArrayList<word>();
 
@@ -70,8 +69,8 @@ public class NumbersActivity extends AppCompatActivity {
         words.add(new word("nine", "wo’e", R.drawable.number_nine, R.raw.number_nine));
         words.add(new word("ten", "na’aacha", R.drawable.number_ten, R.raw.number_ten));
 
-        WordAdapter adptr = new WordAdapter(this, words, R.color.category_numbers);
-        ListView list = (ListView) findViewById(R.id.list);
+        WordAdapter adptr = new WordAdapter(getActivity(), words, R.color.category_numbers);
+        ListView list = (ListView) rootView.findViewById(R.id.list);
         list.setAdapter(adptr);
 
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -85,21 +84,19 @@ public class NumbersActivity extends AppCompatActivity {
                 int result = mAudioManager.requestAudioFocus(mOnAudioFocusChangeListener, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN_TRANSIENT);
 
                 if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
-                    mMediaPlayer = MediaPlayer.create(NumbersActivity.this, w.getmAudioResourceId());
+                    mMediaPlayer = MediaPlayer.create(getActivity(), w.getmAudioResourceId());
                     mMediaPlayer.start();
 
                     mMediaPlayer.setOnCompletionListener(mOnCompleteListener);
                 }
             }
         });
+
+
+        return rootView;
+
     }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
-
-        releaseMediaPlayer();
-    }
 
     private void releaseMediaPlayer() {
         if (mMediaPlayer != null) {
@@ -107,5 +104,11 @@ public class NumbersActivity extends AppCompatActivity {
             mMediaPlayer = null;
             mAudioManager.abandonAudioFocus(mOnAudioFocusChangeListener);
         }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        releaseMediaPlayer();
     }
 }
